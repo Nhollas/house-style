@@ -1,0 +1,42 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "house-style",
+  "homepage": "https://github.com/Nhollas/house-style",
+  "items": [
+    {
+      "name": "typed-env",
+      "type": "registry:item",
+      "title": "Typed env config",
+      "description": "Validated, typed server-side environment variables with Zod.",
+      "dependencies": [
+        "zod"
+      ],
+      "devDependencies": [
+        "vitest"
+      ],
+      "docs": "typed-env installed to src/typed-env. Add your variables to `schema` in src/typed-env/env.ts. See src/typed-env/AGENTS.md.",
+      "files": [
+        {
+          "path": "modules/typed-env/src/env.ts",
+          "type": "registry:file",
+          "target": "~/src/typed-env/env.ts"
+        },
+        {
+          "path": "modules/typed-env/src/create-env.ts",
+          "type": "registry:file",
+          "target": "~/src/typed-env/create-env.ts"
+        },
+        {
+          "path": "modules/typed-env/src/create-env.test.ts",
+          "type": "registry:file",
+          "target": "~/src/typed-env/create-env.test.ts"
+        },
+        {
+          "path": "modules/typed-env/AGENTS.md",
+          "type": "registry:file",
+          "target": "~/src/typed-env/AGENTS.md"
+        }
+      ]
+    }
+  ]
+}

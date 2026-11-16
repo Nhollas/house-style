@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "typed-env",
+  "type": "registry:item",
+  "title": "Typed env config",
+  "description": "Validated, typed server-side environment variables with Zod.",
+  "dependencies": ["zod"],
+  "devDependencies": ["vitest"],
+  "docs": "typed-env installed to src/typed-env. Add your variables to `schema` in src/typed-env/env.ts. See src/typed-env/AGENTS.md.",
+  "files": [
+    { "path": "src/env.ts", "type": "registry:file", "target": "~/src/typed-env/env.ts" },
+    { "path": "src/create-env.ts", "type": "registry:file", "target": "~/src/typed-env/create-env.ts" },
+    { "path": "src/create-env.test.ts", "type": "registry:file", "target": "~/src/typed-env/create-env.test.ts" },
+    { "path": "AGENTS.md", "type": "registry:file", "target": "~/src/typed-env/AGENTS.md" }
+  ]
+}

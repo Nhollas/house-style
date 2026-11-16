@@ -1,0 +1,40 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "typed-env",
+  "title": "Typed env config",
+  "description": "Validated, typed server-side environment variables with Zod.",
+  "dependencies": [
+    "zod"
+  ],
+  "devDependencies": [
+    "vitest"
+  ],
+  "files": [
+    {
+      "path": "modules/typed-env/src/env.ts",
+      "content": "import { z } from \"zod\";\nimport { createEnv } from \"./create-env.js\";\n\n/** Add your app's variables here. Everything reads them through `env`. */\nexport const schema = z.object({\n  NODE_ENV: z.enum([\"development\", \"test\", \"production\"]).default(\"development\"),\n});\n\nexport type Env = z.output<typeof schema>;\n\nexport const env: Env = createEnv(schema, process.env);\n",
+      "type": "registry:file",
+      "target": "~/src/typed-env/env.ts"
+    },
+    {
+      "path": "modules/typed-env/src/create-env.ts",
+      "content": "import type { z } from \"zod\";\n\ntype Source = Record<string, string | undefined>;\n\n/**\n * Parse an env source against a schema. Throws one error listing every\n * invalid or missing variable by name. Values are never included.\n */\nexport function createEnv<T extends z.ZodType>(schema: T, source: Source): z.output<T> {\n  const result = schema.safeParse(source);\n  if (result.success) return result.data;\n\n  const problems = result.error.issues.map((issue) => {\n    const name = issue.path.join(\".\") || \"(root)\";\n    return `  - ${name}: ${issue.message}`;\n  });\n  throw new Error(`Invalid environment variables:\\n${problems.join(\"\\n\")}`);\n}\n",
+      "type": "registry:file",
+      "target": "~/src/typed-env/create-env.ts"
+    },
+    {
+      "path": "modules/typed-env/src/create-env.test.ts",
+      "content": "import { describe, expect, it } from \"vitest\";\nimport { z } from \"zod\";\nimport { createEnv } from \"./create-env.js\";\n\nconst schema = z.object({\n  API_URL: z.url(),\n  PORT: z.coerce.number().int().default(3000),\n  SECRET: z.string().min(32),\n});\n\ndescribe(\"createEnv\", () => {\n  it(\"returns typed, coerced values\", () => {\n    const env = createEnv(schema, {\n      API_URL: \"https://example.com\",\n      PORT: \"8080\",\n      SECRET: \"x\".repeat(32),\n    });\n\n    expect(env).toEqual({ API_URL: \"https://example.com\", PORT: 8080, SECRET: \"x\".repeat(32) });\n  });\n\n  it(\"applies defaults\", () => {\n    const env = createEnv(schema, { API_URL: \"https://example.com\", SECRET: \"x\".repeat(32) });\n\n    expect(env.PORT).toBe(3000);\n  });\n\n  it(\"lists every invalid or missing variable by name in one error\", () => {\n    const run = () => createEnv(schema, { API_URL: \"not a url\", PORT: \"abc\" });\n\n    expect(run).toThrow(/API_URL/);\n    expect(run).toThrow(/PORT/);\n    expect(run).toThrow(/SECRET/);\n  });\n\n  it(\"never includes values in the error\", () => {\n    const leaked = \"hunter2-do-not-log\";\n\n    expect(() => createEnv(schema, { API_URL: leaked, SECRET: leaked })).toThrow(\n      expect.objectContaining({ message: expect.not.stringContaining(leaked) }),\n    );\n  });\n\n  it(\"ignores variables the schema does not mention\", () => {\n    const env = createEnv(schema, {\n      API_URL: \"https://example.com\",\n      SECRET: \"x\".repeat(32),\n      UNRELATED: \"y\",\n    });\n\n    expect(env).not.toHaveProperty(\"UNRELATED\");\n  });\n});\n",
+      "type": "registry:file",
+      "target": "~/src/typed-env/create-env.test.ts"
+    },
+    {
+      "path": "modules/typed-env/AGENTS.md",
+      "content": "# typed-env\n\nTyped, validated environment config for server-side code. The rest of the app reads `env.X`, never `process.env.X`.\n\n## Files\n\n- `env.ts`: the app's **schema** and the `env` object, parsed from `process.env` when first imported. Fails fast.\n- `create-env.ts`: `createEnv(schema, source)`, the parsing mechanism. No side effects.\n- `create-env.test.ts`: tests for the mechanism. They use their own schema, so they keep passing as the app's schema changes.\n\n## Seams\n\n- **Adding a variable**: edit `schema` in `env.ts`. That is the only edit most apps need.\n- **Testing code that needs config**: call `createEnv(schema, { ... })` with a plain object. Do not mutate `process.env` in tests.\n- **Error reporting**: `createEnv` throws one error naming every bad variable. It must never include values, since they are often secrets.\n\n## Safe to change\n\n- The schema, freely.\n- Error wording, as long as values stay out of it.\n\n## Not this module's job\n\n- Loading `.env` files. Use Node's `--env-file` or your framework.\n- Client-side or `NEXT_PUBLIC_*` variables. Server only.\n",
+      "type": "registry:file",
+      "target": "~/src/typed-env/AGENTS.md"
+    }
+  ],
+  "docs": "typed-env installed to src/typed-env. Add your variables to `schema` in src/typed-env/env.ts. See src/typed-env/AGENTS.md.",
+  "type": "registry:item"
+}
